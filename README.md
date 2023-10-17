@@ -2,4 +2,4 @@
 
 Here are some algorithms for adiabatic quantum computing.
 
-- Single shortest path
+- [Single shortest path](shortest_path/single_shortest_path.ipynb)
