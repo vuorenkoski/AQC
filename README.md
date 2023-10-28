@@ -7,6 +7,6 @@ Here are some my adiabatic quantum computing algorithms (using QUBOs in D-Wave p
 - [Exact cover](exact_cover/Exact_cover.ipynb)
 - [Sudoku with exact cover](exact_cover/Exact_cover_sudoku.ipynb)
 - [Graph isomorphism](graph_isomorphism/graph_isomorphism.ipynb)
-- [Community detection](community_detection/community_detection.ipynb) (draft)
+- [Community detection](community_detection/community_detection.ipynb)
 
 
