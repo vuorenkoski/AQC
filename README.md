@@ -9,4 +9,7 @@ Here are some my adiabatic quantum computing algorithms (using QUBOs in D-Wave p
 - [Graph isomorphism](graph_isomorphism/graph_isomorphism.ipynb)
 - [Community detection](community_detection/community_detection.ipynb)
 
+QAOA
+
+- [Graph isomorphism](graph_isomorphism/graph_isomorphism_qaoa.ipynb)
 
