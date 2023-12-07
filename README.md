@@ -13,3 +13,4 @@ QAOA
 
 - [Graph isomorphism](graph_isomorphism/graph_isomorphism_qaoa.ipynb)
 
+[Performance testing](performance_testing/)
