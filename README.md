@@ -13,4 +13,4 @@ QAOA
 
 - [Graph isomorphism](graph_isomorphism/graph_isomorphism_qaoa.ipynb)
 
-[Performance measurement](performance_measurement/README.md)
+[Performance measurement](performance_measurement/)
