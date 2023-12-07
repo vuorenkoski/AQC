@@ -1,4 +1,4 @@
-# Python programs for performance testing of algorithms
+# Python programs for performance measurement of algorithms
 
 All pairs shortest paht: measure_apsp.py
 
