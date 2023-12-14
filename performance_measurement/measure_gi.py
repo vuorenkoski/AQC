@@ -8,10 +8,8 @@ from api_token import token
 from check_result import check_result_gi
 
 num_reads_sel = [2000]
-#sizes = [5,7,10,15,20]
-sizes = [10]
+sizes = [5,7,10,15,20]
 solvers = ['local simulator', 'cloud hybrid solver', 'quantum solver']
-#solvers = ['cloud hybrid solver']
 graph_types = ['path graph', 'star graph', 'cycle graph', 'complete graph', 'tree graph', 'single cycle graph', 
                'multiple cycle graph', 'bipartite graph', 'regular graph', 'wheel graph', 'friendship graph',
                'random graph']
@@ -46,6 +44,7 @@ for num_reads in num_reads_sel:
                         try:
                             sampleset = LeapHybridSampler(token=token).sample(bqm).aggregate()
                         except Exception as err:
+                            print(err)
                             continue 
                         result['physical_qubits'] = 'n/a'
                         result['time'] = int(sampleset.info['run_time'] / 1000)
@@ -55,6 +54,7 @@ for num_reads in num_reads_sel:
                         try:
                             sampleset = EmbeddingComposite(machine).sample(bqm, num_reads=num_reads, return_embedding=True).aggregate()
                         except Exception as err:
+                            print(err)
                             continue 
                         result['solver'] = 'Quantum'
                         result['time'] = int(sampleset.info['timing']['qpu_access_time'] / 1000)
@@ -65,7 +65,7 @@ for num_reads in num_reads_sel:
                     result['performance'] = check_result_gi(sampleset, -len(G1.edges))
                     result_table.append(result)
 
-print(result_table)
+#print(result_table)
 print_result_latex(result_table)
 
 

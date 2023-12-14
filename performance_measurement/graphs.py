@@ -42,6 +42,7 @@ def create_graph(name, vertices, weight=False, directed=True, permutation=False)
     elif name=='random graph':
         G = nx.gnp_random_graph(vertices, 0.30, seed=42, directed=directed)
         if weight:
+            random.seed(42)
             nx.set_edge_attributes(G, {e: {'weight': random.randint(1, 10)} for e in G.edges})
         if permutation:
             mapping = dict(zip(G.nodes(), sorted(G.nodes(), key=lambda k: random.random())))
@@ -49,6 +50,8 @@ def create_graph(name, vertices, weight=False, directed=True, permutation=False)
             return (G, GP)
         else:
             return G
+    elif name=='community graph':
+            return graph_community(vertices,3)
     else:
         E = []
     if E==[]:
@@ -65,6 +68,7 @@ def create_graph(name, vertices, weight=False, directed=True, permutation=False)
     for e in E:
         G.add_edge(e[0], e[1])
     if weight:
+        random.seed(42)
         nx.set_edge_attributes(G, {e: {'weight': random.randint(1, 10)} for e in G.edges})
     if permutation:
         mapping = dict(zip(G.nodes(), sorted(G.nodes(), key=lambda k: random.random())))
@@ -176,6 +180,30 @@ def graph_wheel(vertices):
 def graph_friendship(vertices):
     return []
 
+def graph_community(vertices,communities): 
+    G = nx.Graph()
+    vpc = int(vertices/communities)
+    lo = vertices-vpc*communities
+    index = 0
+    c0 = []
+    G.add_nodes_from([x for x in range(vertices)])
+    for i in range(communities):
+        if lo>0:
+            c = vpc+1
+            lo -= 1
+        else:
+            c = vpc
+        for j in range(c-1):
+            for k in range(j+1,c):
+                G.add_weighted_edges_from([(index + j,index + k, 5)])
+        c0.append(index)
+        index += c
+    for i in range(communities-1):
+        for j in range(i+1,communities):
+            G.add_weighted_edges_from([(c0[i],c0[j], 1)])
+            G.add_weighted_edges_from([(c0[i]+1,c0[j]+1, 1)])
+    return G
+
 def print_graph(G, fig_size=6):
     pos = nx.spring_layout(G)
     plt.figure(figsize=(fig_size, fig_size))
@@ -188,6 +216,9 @@ def print_graph(G, fig_size=6):
     plt.show()
 
 def print_result_latex(table):
+    if table==[]:
+        print('Result set is empty')
+        return
     v = table[0]['gtype']
     for t in table:
         if v!=t['gtype']:

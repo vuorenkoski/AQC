@@ -1,21 +1,17 @@
 from graphs import create_graph, print_graph, print_result_latex
-from qubo_functions import create_qubo_apsp
+from qubo_functions import create_qubo_cd
 from dimod import BinaryQuadraticModel
 import time
 from dwave.system import DWaveSampler, EmbeddingComposite, LeapHybridSampler
 from dwave.samplers import SimulatedAnnealingSampler
 from api_token import token
-from check_result import check_result_apsp
+from check_result import check_result_cd
 
-sizes = [5,7,10,15]
-solvers = ['local simulator', 'quantum solver']
+communities = 3 #Max communities parameter, graphs have 3 communities
 num_reads_sel = [2000]
-graph_types = ['path graph', 'star graph', 'cycle graph', 'complete graph', 'tree graph', 'single cycle graph', 
-               'multiple cycle graph', 'bipartite graph', 'regular graph', 'wheel graph', 'friendship graph',
-               'random graph']
-#sizes = [15]
-#solvers = ['local simulator']
-#graph_types = ['complete graph']
+sizes = [7,10,15,20,30]
+solvers = ['local simulator', 'cloud hybrid solver', 'quantum solver']
+graph_types = ['community graph']
 
 machine = DWaveSampler(solver={'chip_id': 'Advantage_system4.1'}, token=token)
 print('Chip:', machine.properties['chip_id'])
@@ -26,18 +22,17 @@ for num_reads in num_reads_sel:
     for size in sizes:
         for gtype in graph_types:
             print(gtype)
-            G = create_graph(gtype, size, weight=True)
+            G = create_graph(gtype, size, weight=True, directed=False)
             if G!=None:
-                Q = create_qubo_apsp(G)
+                Q = create_qubo_cd(G, communities)
                 labels = {}
-                for i in range(size):
-                    labels[i]='s'+str(i)
-                    labels[size+i]='t'+str(i)   
-                for i,e in enumerate(G.edges):
-                    labels[size*2+i] = str(e[0]) + '-' + str(e[1])
+                for i in range(len(G.nodes)):
+                    for j in range(communities):
+                        labels[i*communities + j]=(i,j)
 
                 bqm = BinaryQuadraticModel(Q, 'BINARY').relabel_variables(labels, inplace=False)
                 for solver in solvers:
+                    print(solver)
                     result = {}
                     result['gtype'] = gtype
                     result['vertices'] = len(G.nodes)
@@ -50,6 +45,16 @@ for num_reads in num_reads_sel:
                         sampleset = SimulatedAnnealingSampler().sample(bqm, num_reads=num_reads).aggregate()
                         result['time'] = int((time.time()-ts)*1000)
                         result['samples'] = str(num_reads)
+                    elif solver=='cloud hybrid solver':
+                        try:
+                            sampleset = LeapHybridSampler(token=token).sample(bqm).aggregate()
+                        except Exception as err:
+                            print(err)
+                            continue 
+                        result['physical_qubits'] = 'n/a'
+                        result['time'] = int(sampleset.info['run_time'] / 1000)
+                        result['solver'] = 'Hybrid'
+                        result['samples'] = 'n/a'
                     elif solver=='quantum solver':
                         try:
                             sampleset = EmbeddingComposite(machine).sample(bqm, num_reads=num_reads, return_embedding=True).aggregate()
@@ -62,7 +67,7 @@ for num_reads in num_reads_sel:
                         result['chainb'] = sampleset.first.chain_break_fraction
                         result['samples'] = num_reads
                     result['energy'] = int(sampleset.first.energy)
-                    result['performance'] = str(check_result_apsp(G, sampleset)) + ' \\%'
+                    result['performance'] = check_result_cd(G,sampleset,communities)
                     result_table.append(result)
 
 #print(result_table)

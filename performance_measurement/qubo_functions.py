@@ -15,10 +15,9 @@ def create_qubo_apsp(G):
 
     # Constraints 1 and 2
     for i in range(vertices):
-        for j in range(vertices):
-            if i!=j:
-                Q[i,j] += p
-                Q[vertices+i,j+vertices] += p
+        for j in range(i+1, vertices):
+            Q[i,j] += p
+            Q[vertices+i,vertices+j] += p
         
     # Constraint 3
     for i in range(vertices):
@@ -34,30 +33,29 @@ def create_qubo_apsp(G):
 
     # Constraint 5
     for v in range(vertices):
-        for i,e in enumerate(E):
-            if e[1]==v:
+        for i in range(edges):
+            if E[i][1]==v:
                 Q[vertices+v,vertices*2+i] -= p
-            if e[0]==v:
+            if E[i][0]==v:
                 Q[vertices+v,vertices*2+i] += p
 
-    # Constraint 6 and 7
-    for i,ei in enumerate(E):
-        for j,ej in enumerate(E):
-            if ei[0]==ej[0] or ei[1]==ej[1]:
+    # Constraint 6
+    for i in range(edges):
+        for j in range(i+1,edges):
+            if E[i][0]==E[j][0] or E[i][1]==E[j][1]:
                 Q[vertices*2+i,vertices*2+j] += p
-            if ei[1]==ej[0] or ei[0]==ej[1]:
-                Q[vertices*2+i,vertices*2+j] -= p/2
+
+    # Constraint 7
+    for i in range(edges):
+        Q[vertices*2+i,vertices*2+i] +=p
+        for j in range(i+1,edges):
+            if E[i][1]==E[j][0] or E[i][0]==E[j][1]:
+                Q[vertices*2+i,vertices*2+j] -= p
 
     # Constraint 8 
     for i in range(edges):
         Q[vertices*2+i,vertices*2+i] += E[i][2]
 
-    # Quadratic coefficients in lower triangle to upper triangle
-    for i in range(vertices): 
-        for j in range(i):
-            Q[j,i] += Q[i,j]
-            Q[i,j] = 0
-            
     return Q
 
 def create_qubo_cd(G, communities):
@@ -75,10 +73,10 @@ def create_qubo_cd(G, communities):
 
     # Constraint 1
     for v in range(vertices): 
-        for c1 in range(communities): 
-            for c2 in range(communities):
-                if  c1!=c2:
-                    Q[v*communities+c1,v*communities+c2] += p
+        for c1 in range(communities):
+            Q[v*communities+c1,v*communities+c1] -= p
+            for c2 in range(c1+1, communities):
+                Q[v*communities+c1,v*communities+c2] += 2*p
                 
     # Constraint 2
     for c in range(communities):
@@ -123,7 +121,7 @@ def create_qubo_gi(G1, G2):
             Q[e1[0]*vertices+e2[1], e1[1]*vertices+e2[0]] -= 1
             
     # All quadratic coefficients in lower triangle to upper triangle
-    for i in range(vertices): 
+    for i in range(vertices*vertices): 
         for j in range(i):
             Q[j,i] += Q[i,j]
             Q[i,j] = 0
