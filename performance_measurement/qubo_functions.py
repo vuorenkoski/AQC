@@ -24,20 +24,14 @@ def create_qubo_apsp(G):
         Q[i,i+vertices] += p
 
     # Constraint 4
-    for v in range(vertices):
-        for i,e in enumerate(E):
-            if e[0]==v:
-                Q[v,vertices*2+i] -= p
-            if e[1]==v:
-                Q[v,vertices*2+i] += p
-
+    for i in range(edges):
+        Q[E[i][0],vertices*2+i] -= p
+        Q[E[i][1],vertices*2+i] += p
+ 
     # Constraint 5
-    for v in range(vertices):
-        for i in range(edges):
-            if E[i][1]==v:
-                Q[vertices+v,vertices*2+i] -= p
-            if E[i][0]==v:
-                Q[vertices+v,vertices*2+i] += p
+    for i in range(edges):
+        Q[vertices+E[i][1],vertices*2+i] -= p
+        Q[vertices+E[i][0],vertices*2+i] += p
 
     # Constraint 6
     for i in range(edges):
